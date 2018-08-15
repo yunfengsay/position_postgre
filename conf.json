@@ -1,0 +1,11 @@
+{
+    "DBUrl": "118.25.13.120",
+    "DBPort":5432,
+    "DBName": "position",
+    "DBUser": "admin",
+    "DBPwd": "12345",
+    "ServerPort": ":8002",
+    "ChangePwdToken": "bac123",
+    "QiNiu_ACCESS_KEY": "5H53Vzt51TXbJjmOPJUfDdgMuD3WBnTzYuvbdSN0",
+    "QiNiu_SECRET_KEY": "dHCVS1xG0ue_pRNQFwMMJokyz_A34_eAU8jU1HPC"
+}

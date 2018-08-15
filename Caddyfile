@@ -1,0 +1,26 @@
+position.group {
+    gzip
+    proxy / http://www.google.com
+
+    log /var/log/caddy/position.group.log
+    header /api {
+         Access-Control-Allow-Origin  *
+         Access-Control-Allow-Methods "GET, POST, OPTIONS"
+         -Server
+    }
+}
+
+api.position.group {
+    proxy / 127.0.0.1:8002 {
+            transparent
+    }
+}
+
+docs.position.group {
+    gzip
+    browse
+}
+yoona.position.group {
+     gzip
+     browse ../../../yoona_imgs
+ }
