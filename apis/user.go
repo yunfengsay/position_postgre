@@ -2,7 +2,6 @@ package apis
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"position_postgre/models"
 	"position_postgre/tools"
@@ -17,16 +16,23 @@ const (
 )
 
 type WXUserLoginForm struct {
-	Code     string      `binding:"required" json:"code"`
-	UserInfo interface{} `binding:"required" json:"user_info"`
+	Code     string   `binding:"required" json:"code"`
+	UserInfo UserInfo `binding:"required" json:"user_info"`
 }
+
+type UserInfo struct {
+	AvatarUrl string `binding:"required" json:"avatarUrl"`
+	Gender    int    `binding:"required" json:"gender"`
+	NickName  string `binding:"required" json:"nickName"`
+}
+
 type OpenID struct {
 	Openid string
 }
 
 func AddUserApi(c *gin.Context) {
 	pwd := c.Request.FormValue("pwd")
-	nUser := new(models.User)
+	nUser := models.User{}
 	nUser.UserName = c.Request.FormValue("user_name")
 	nUser.NickName = c.Request.FormValue("nick_name")
 	nUser.Age, _ = strconv.Atoi(c.Request.FormValue("age"))
@@ -37,6 +43,7 @@ func AddUserApi(c *gin.Context) {
 	nUser.Phone = c.Request.FormValue("phone")
 	nUser.AvatarUrl = c.Request.FormValue("avatarurl")
 	nUser.Pwd = pwd
+	models.InsertUser(nUser)
 	// err, _ := models.AddUser(nUser)
 	// if err != nil {
 	// 	c.JSON(http.StatusOK, gin.H{
@@ -47,6 +54,16 @@ func AddUserApi(c *gin.Context) {
 	// 		"code": 0,
 	// 	})
 	// }
+}
+
+func AddWxUser(user UserInfo, nickname string) {
+	nUser := models.User{}
+	nUser.AvatarUrl = user.AvatarUrl
+	nUser.Gender = user.Gender
+	nUser.NickName = user.NickName
+	nUser.OpenId = nickname
+	models.InsertUser(nUser)
+
 }
 
 func getJson(url string, target interface{}) error {
@@ -60,41 +77,30 @@ func getJson(url string, target interface{}) error {
 }
 
 func WXLogin(c *gin.Context) {
-	// var token string
+	var session string
 	wx_login := &WXUserLoginForm{}
 	err := c.BindJSON(wx_login)
 	tools.PanicError(err)
 	url := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + wx_login.Code + "&grant_type=authorization_code"
 	respId := OpenID{}
 	getJson(url, &respId)
-	userid := models.FindUserByOpenid(respId.Openid)
-	log.Println(userid)
-}
+	var user = models.User{}
+	row := models.FindUserByOpenid(respId.Openid)
+	for row.Next() {
+		row.Scan(&user.Id, &user.UserName, &user.NickName, &user.AvatarUrl, &user.OpenId)
+	}
+	tools.PanicError(err)
 
-// func WXLogin(c *gin.Context) {
-// 	var token string
-// 	wx_login := &WXUserLoginForm{}
-// 	err := c.BindJSON(wx_login)
-// 	url := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + wx_login.Code + "&grant_type=authorization_code"
-// 	respId := OpenID{}
-// 	getJson(url, &respId)
-// 	userid := models.FindUserByOpenid(respId.Openid)
-// 	log.Println("running")
-// 	if userid != "" {
-// 		token, err = models.AddOrUpdate(userid, respId.Openid)
-// 	} else {
-// 		nUser := new(models.User)
-// 		user_info := wx_login.UserInfo.(map[string]interface{})
-// 		nUser.Gender = int(user_info["gender"].(float64))
-// 		nUser.NickName = user_info["nickName"].(string)
-// 		nUser.AvatarUrl = user_info["avatarUrl"].(string)
-// 		nUser.OpenId = respId.Openid
-// 		_, id := models.AddUser(nUser)
-// 		token, err = models.AddOrUpdate(id, respId.Openid)
-// 	}
-// 	tools.PanicError(err)
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"code":  0,
-// 		"token": token,
-// 	})
-// }
+	if user.Id == 0 {
+		AddWxUser(wx_login.UserInfo, respId.Openid)
+		session = models.CreateSession()
+		models.SessionBind(respId.Openid, session)
+	} else {
+		//session =
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":  0,
+		"token": session,
+	})
+}

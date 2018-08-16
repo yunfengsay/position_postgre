@@ -33,3 +33,7 @@ func match(secret, plain string) bool {
 	h.Write([]byte(plain))
 	return bytes.Equal(h.Sum(nil), data[SaltSize:])
 }
+
+func BuildSqlStr() {
+
+}

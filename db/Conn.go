@@ -25,9 +25,11 @@ func init() {
 	var err error
 	DB, err = sql.Open("postgres", psqlInfo)
 	tools.PanicError(err)
-	defer DB.Close()
 
 	err = DB.Ping()
 	tools.PanicError(err)
-	log.Println("connect db success")
+
+	if err == nil{
+		log.Println("connect db success")
+	}
 }

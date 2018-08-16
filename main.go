@@ -27,7 +27,7 @@ func initRouter() *gin.Engine {
 	router := gin.Default()
 	router.GET("/", apis.IndexApi)
 	user := router.Group("/user")
-	// user.POST("/add", apis.AddUserApi)
+	 user.POST("/signup", apis.AddUserApi)
 	user.POST("/wx/login", apis.WXLogin)
 	// location := router.Group("/location")
 
@@ -45,6 +45,8 @@ func initRouter() *gin.Engine {
 }
 
 func main() {
+	defer db.DB.Close()
+
 	log.SetFlags(log.Ldate | log.Lshortfile)
 	log.Println(db.DB)
 
