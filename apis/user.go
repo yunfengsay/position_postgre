@@ -3,6 +3,7 @@ package apis
 import (
 	"encoding/json"
 	"net/http"
+	"position_postgre/modelStruct"
 	"position_postgre/models"
 	"position_postgre/tools"
 	"strconv"
@@ -32,7 +33,7 @@ type OpenID struct {
 
 func AddUserApi(c *gin.Context) {
 	pwd := c.Request.FormValue("pwd")
-	nUser := models.User{}
+	nUser := modelStruct.User{}
 	nUser.UserName = c.Request.FormValue("user_name")
 	nUser.NickName = c.Request.FormValue("nick_name")
 	nUser.Age, _ = strconv.Atoi(c.Request.FormValue("age"))
@@ -57,7 +58,7 @@ func AddUserApi(c *gin.Context) {
 }
 
 func AddWxUser(user UserInfo, nickname string) {
-	nUser := models.User{}
+	nUser := modelStruct.User{}
 	nUser.AvatarUrl = user.AvatarUrl
 	nUser.Gender = user.Gender
 	nUser.NickName = user.NickName
@@ -84,21 +85,17 @@ func WXLogin(c *gin.Context) {
 	url := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + wx_login.Code + "&grant_type=authorization_code"
 	respId := OpenID{}
 	getJson(url, &respId)
-	var user = models.User{}
+	var user = modelStruct.User{}
 	row := models.FindUserByOpenid(respId.Openid)
 	for row.Next() {
 		row.Scan(&user.Id, &user.UserName, &user.NickName, &user.AvatarUrl, &user.OpenId)
 	}
 	tools.PanicError(err)
-
 	if user.Id == 0 {
 		AddWxUser(wx_login.UserInfo, respId.Openid)
-		session = models.CreateSession()
-		models.SessionBind(respId.Openid, session)
-	} else {
-		//session =
 	}
-
+	session = models.CreateSession()
+	models.SessionBind(respId.Openid, session)
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,
 		"token": session,
