@@ -32,7 +32,7 @@ func initRouter() *gin.Engine {
 	location := router.Group("/location")
 
 	location.POST("/add_location", AuthNeedLogin(), apis.AddLocationApi)
-	// location.POST("/get_locations", apis.GetLocationsApi)
+	location.POST("/get_locations", apis.GetLocationsApi)
 	// location.GET("/get_location/:id", apis.GetPageByIdApi)
 	// location.DELETE("/delete_location/:id", apis.DeleteLocation)
 	// location.POST("/comment", AuthNeedLogin(), apis.AddComment)

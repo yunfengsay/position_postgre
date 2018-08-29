@@ -13,3 +13,7 @@ func AddLocationApi(c *gin.Context) {
 	tools.PanicError(err)
 	models.AddLocation(locationForm)
 }
+
+func GetLocationsApi(c *gin.Context) {
+
+}
