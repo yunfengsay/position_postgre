@@ -17,6 +17,7 @@ func AuthNeedLogin() gin.HandlerFunc {
 		if token == "" {
 			c.AbortWithStatus(400)
 		}
+		c.Set("session", token)
 		// id := models.GetUserIdByToken(token)
 		// c.Set("userid", id)
 		c.Next()
@@ -32,7 +33,7 @@ func initRouter() *gin.Engine {
 	location := router.Group("/location")
 
 	location.POST("/add_location", AuthNeedLogin(), apis.AddLocationApi)
-	location.POST("/get_locations", apis.GetLocationsApi)
+	location.POST("/get_locations", apis.NeerLocation)
 	// location.GET("/get_location/:id", apis.GetPageByIdApi)
 	// location.DELETE("/delete_location/:id", apis.DeleteLocation)
 	// location.POST("/comment", AuthNeedLogin(), apis.AddComment)
