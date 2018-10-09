@@ -5,23 +5,24 @@ import (
 	"position_postgre/conf"
 	"position_postgre/db"
 
-	"position_postgre/apis"
-
 	"github.com/gin-gonic/gin"
+	"position_postgre/apis"
+	"position_postgre/jwt"
 )
 
 func AuthNeedLogin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		token := c.Request.Header.Get("token")
-		log.Println("token ", token)
-		if token == "" {
-			c.AbortWithStatus(400)
-		}
-		c.Set("session", token)
-		// id := models.GetUserIdByToken(token)
-		// c.Set("userid", id)
-		c.Next()
-	}
+	//return func(c *gin.Context) {
+	//	token := c.Request.Header.Get("token")
+	//	log.Println("token ", token)
+	//	if token == "" {
+	//		c.AbortWithStatus(400)
+	//	}
+	//	c.Set("session", token)
+	//	// id := models.GetUserIdByToken(token)
+	//	// c.Set("userid", id)
+	//	c.Next()
+	//}
+	return jwt.JWTAuth()
 }
 
 func initRouter() *gin.Engine {

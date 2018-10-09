@@ -94,7 +94,7 @@ func WXLogin(c *gin.Context) {
 	if user.Id == 0 {
 		AddWxUser(wx_login.UserInfo, respId.Openid)
 	}
-	session = models.CreateSession()
+	session = models.CreateSession(user.Id, user.UserName, user.OpenId)
 	models.SessionBind(respId.Openid, session)
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,

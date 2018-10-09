@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/satori/go.uuid"
+	jwtgo "github.com/dgrijalva/jwt-go"
 	"position_postgre/db"
+	myjwt "position_postgre/jwt"
 	"position_postgre/modelStruct"
 	"position_postgre/tools"
 	"time"
@@ -17,6 +18,7 @@ var (
       openid = excluded.openid,
       expire = excluded.expire,
             create_at = excluded.create_at;`
+	SecretKey = "this is secret key"
 )
 
 func MakeToken(openid string) string {
@@ -33,10 +35,24 @@ func MakeToken(openid string) string {
 	return token
 }
 
-func CreateSession() string {
-	u2, err := uuid.NewV4()
+func CreateSession(id int, user_name, openid string) string {
+	j := &myjwt.JWT{
+		[]byte("location signingkey"),
+	}
+	claims := myjwt.CustomClaims{
+		id,
+		user_name,
+		openid,
+		jwtgo.StandardClaims{
+			NotBefore: int64(time.Now().Unix() - 1000),   // 签名生效时间
+			ExpiresAt: int64(time.Now().Unix() + 604800), // 过期时间 一个礼拜
+			Issuer:    "yunfengsay",                      //签名的发行者
+		},
+	}
+
+	token, err := j.CreateToken(claims)
 	tools.PanicError(err)
-	return u2.String()
+	return token
 }
 
 func SessionBind(openid string, session string) {

@@ -20,7 +20,7 @@ var (
 		($1,$2,$3, ST_GeomFromText('POINT(%f %f)',4326),%f,%f,$4)
 	`
 	NEER_LOCATION = `
-	SELECT id,imgs,content,create_at,l_type,user_obj,comment_num,liked_num,ST_Distance_Sphere(Point(%f, %f)::geometry ,point) AS distance FROM location ORDER BY distance limit 10;
+	SELECT id,imgs,content,create_at,l_type,user_obj,comment_num,liked_num,ST_Distance_Sphere(Point(%f, %f)::geometry ,point) AS distance FROM location WHERE is_delete=0 ORDER BY distance limit 10 ;
 `
 )
 
